@@ -1,0 +1,33 @@
+# Update the list of available packages
+sudo apt-get update
+
+# Install required tools: certificates, curl and gpg
+sudo apt-get install -y ca-certificates curl gnupg
+
+# Create the keyrings directory (with correct permissions) and download Docker's GPG key
+# If you are already root (sudo su), remove 'sudo' in the commands
+sudo install -m 0755 -d /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg && sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Make sure the Docker GPG key is readable
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the Docker repository to the system's sources list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(. /etc/os-release; echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker packages: engine, CLI, container runtime, buildx and compose plugin
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Add the current user to the 'docker' group so you can run Docker without sudo
+sudo usermod -aG docker $USER
+
+# Reboot the system to apply group changes
+rebooting
+
+# Alternatively, use newgrp without rebooting
+newgrp docker
+
+# Enable and start Docker service (works only if the system uses systemd)
+sudo systemctl enable --now docker
+
+# Check the installed Docker version
+docker --version
